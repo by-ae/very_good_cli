@@ -401,6 +401,9 @@ Only one value can be selected.
     // subcommand would reject a `--timeout` flag, and `flutter test`'s own
     // per-test timeout does not fire when a test awaits a future that never
     // completes, which is the hang [timeout_seconds] exists to bound.
+    // '--check-ignore' is registered only on `very_good dart test`. The
+    // Flutter runner (`very_good test`) rejects it with exit 64, so it is
+    // forwarded only when `dart` is true.
     return [
       ..._flag(args, 'dart', 'dart'),
       'test',
@@ -423,7 +426,8 @@ Only one value can be selected.
       ..._option(args, 'dart-define-from-file', '--dart-define-from-file'),
       ..._option(args, 'platform', '--platform'),
       ..._flag(args, 'run_skipped', '--run-skipped'),
-      ..._flag(args, 'check_ignore', '--check-ignore'),
+      if (args['dart'] == true)
+        ..._flag(args, 'check_ignore', '--check-ignore'),
       ..._flag(args, 'show_uncovered', '--show-uncovered'),
       // Positional test targets go last, after every option, so that they are
       // parsed as `rest` rather than as a value for the preceding option. The

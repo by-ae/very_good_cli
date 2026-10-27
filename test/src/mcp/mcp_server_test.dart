@@ -523,6 +523,45 @@ void main() {
         },
       );
 
+      test(
+        'does not forward check_ignore to the Flutter test runner',
+        () async {
+          // `--check-ignore` is registered only on `very_good dart test`.
+          // `very_good test` rejects the flag with exit 64.
+          await sendRequest(
+            CallToolRequest.methodName,
+            _params(
+              CallToolRequest(
+                name: 'test',
+                arguments: {'dart': false, 'check_ignore': true},
+              ),
+            ),
+          );
+
+          final capturedArgs =
+              verify(() => mockCommandRunner.run(captureAny())).captured.first
+                  as List<String>;
+          expect(capturedArgs, equals(['test']));
+        },
+      );
+
+      test('forwards check_ignore only to the Dart test runner', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'test',
+              arguments: {'dart': true, 'check_ignore': true},
+            ),
+          ),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, equals(['dart', 'test', '--check-ignore']));
+      });
+
       test('passes paths as positional test targets behind `--`', () async {
         await sendRequest(
           CallToolRequest.methodName,
